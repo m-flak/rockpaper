@@ -104,7 +104,6 @@ class MainScene(rockpaper.scene.Scene):
             if self.lifemeter.is_dead() is True:
                 dead = True
             if self.turn == Turn.computer:
-                print("Computer's turn")
                 self.winner = self.calculate_victory(self.playerhand)
                 if self.winner != Winners.player and self.winner != Winners.nobody:
                     self.lifemeter - 1
