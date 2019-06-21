@@ -2,6 +2,7 @@ from enum import Enum
 import pygame
 import random
 import rockpaper.hands
+import rockpaper.life
 from rockpaper.resrc import find_resource
 import rockpaper.scene
 from rockpaper import sacred_events
@@ -23,6 +24,7 @@ class MainScene(rockpaper.scene.Scene):
         self.comphand = None
         self.winner = None
         self.hands = None
+        self.lifemeter = rockpaper.life.Life(3)
         self.font  = None
         self.hand_text = "Nothing Selected."
         self.win_text = ""
@@ -37,7 +39,8 @@ class MainScene(rockpaper.scene.Scene):
     def draw(self):
         if not self.changing:
             primary = pygame.display.get_surface()
-
+            primary.fill((0,0,0)) # # # OH WOW, I FORGOT THIS
+                                  # this makes sense lol
             # DRAW THE HANDS!
             self.hands.draw_hands(primary)
             # CLEAR THE AREA(s) WE DRAW TEXT TO
@@ -52,6 +55,9 @@ class MainScene(rockpaper.scene.Scene):
             if self.comphand is not None:
                 self.hands.draw_enemy_hand(primary, self.comphand)
 
+            # DRAW HEALTH
+            self.lifemeter.draw_hearts(primary, pygame.Rect(600,48,48,48))
+
             # WHO WON? (yet?)
             if self.winner is not None:
                 blankie2 = pygame.Surface((800,32))
@@ -65,11 +71,14 @@ class MainScene(rockpaper.scene.Scene):
                     wintext = self.font.render(self.win_text, False, (255,0,0))
 
                 primary.blit(wintext, (400-len(self.win_text)*2,16))
-            
+
             return pygame.display.flip()
 
     def on_change(self):
         print("Changing scene...")
+
+        # reset state
+        self.lifemeter = rockpaper.life.Life(3)
 
         primary = pygame.display.get_surface()
         primary.fill((0,0,0))
@@ -79,9 +88,13 @@ class MainScene(rockpaper.scene.Scene):
 
     def run(self, events):
         if not self.changing:
+            if self.lifemeter.is_dead() is True:
+                print("Ur dead")
             if self.turn == Turn.computer:
                 print("Computer's turn")
                 self.winner = self.calculate_victory(self.playerhand)
+                if self.winner != Winners.player and self.winner != Winners.nobody:
+                    self.lifemeter - 1
                 self.turn = Turn.player
                 self.set_winner_text(self.winner)
 
