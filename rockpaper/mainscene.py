@@ -41,6 +41,16 @@ class MainScene(rockpaper.scene.Scene):
             primary = pygame.display.get_surface()
             primary.fill((0,0,0)) # # # OH WOW, I FORGOT THIS
                                   # this makes sense lol
+
+            if self.lifemeter.is_dead() is True:
+                string = "You have died."
+                string2 = "Press SPACE to continue..."
+                deadtext = self.font.render(string, False, (255,0,0))
+                deadtext2 = self.font.render(string2, False, (255,0,0))
+                primary.blit(deadtext, (400-len(string)//2,300))
+                primary.blit(deadtext2, (400-len(string2)//2, 348))
+                return pygame.display.flip()
+
             # DRAW THE HANDS!
             self.hands.draw_hands(primary)
             # CLEAR THE AREA(s) WE DRAW TEXT TO
@@ -84,12 +94,15 @@ class MainScene(rockpaper.scene.Scene):
         primary.fill((0,0,0))
         pygame.display.flip()
 
+        self.changing = False
         return
 
     def run(self, events):
         if not self.changing:
+            dead = False
+
             if self.lifemeter.is_dead() is True:
-                print("Ur dead")
+                dead = True
             if self.turn == Turn.computer:
                 print("Computer's turn")
                 self.winner = self.calculate_victory(self.playerhand)
@@ -126,6 +139,12 @@ class MainScene(rockpaper.scene.Scene):
                     if tf is True:
                         self.turn = Turn.computer
                         self.playerhand = hand
+                if dead:
+                    if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+                        if event.key == pygame.K_SPACE:
+                            dead = False
+                            self.lifemeter.reset_health()
+
                 # never process events in main handler
                 if event.type in sacred_events:
                     self.repost_events(event)

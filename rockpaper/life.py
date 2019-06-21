@@ -21,6 +21,9 @@ class Life(object):
             return True
         return False
 
+    def reset_health(self):
+        self.health = self.max_health
+    
     # draw from right to left, rectWhere is rightmost coordinates
     # hearts are 48x48
     def draw_hearts(self, draw_surface, rectWhere):
